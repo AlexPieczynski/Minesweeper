@@ -1,0 +1,25 @@
+import javax.swing.*;
+
+public class TestBoard{
+
+  private JFrame mainFrame;
+  private JLabel headerlabel;
+  private JLabel statusLabel;
+  private JPanel controlPanel;
+  private JLabel msglabel;
+  
+  public TestBoard(){
+   prepGUI();
+  }
+  
+  public static void main(String[] args){
+    TestBoard tBoard = new TestBoard();
+  }//End of main method
+  
+  private void prepGUI(){
+    mainFrame = new JFrame("TestBoard");
+    mainFrame.setSize(400,400);
+    
+  }
+  
+}
