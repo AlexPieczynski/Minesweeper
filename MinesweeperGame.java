@@ -10,8 +10,8 @@ class MinesweeperGame
   private int nMines; //used to display num of mines left on the board. decrements when a mine is marked.
   private Timer clock; //counts time elapsed since first left-click on Grid
   private int secs; //same as above
-  
   //private Grid board;
+  private HighScores highScores;
   
   //updates secs value every time clock fires. also prints out each second. STOPS AT 15 SECONDS
   private class TimeHandler implements ActionListener{
@@ -28,6 +28,7 @@ class MinesweeperGame
   {
     nMines = 10;
     secs = 0;
+    highScores = new HighScores();
     TimeHandler t = new TimeHandler(); 
     clock = new Timer(1000, t);
     clock.start();
