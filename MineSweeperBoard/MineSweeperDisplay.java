@@ -14,6 +14,7 @@ public class MineSweeperDisplay extends JPanel{
   JLabel smiley = new JLabel("img");
   GridBagLayout gBag = new GridBagLayout();
   GridBagConstraints c = new GridBagConstraints();
+<<<<<<< HEAD
   
   //---------Timer and Counter Variables-----------------
   private int nMines; //used to display num of mines left on the board. decrements when a mine is marked.
@@ -21,6 +22,9 @@ public class MineSweeperDisplay extends JPanel{
   private int secs; //same as above
   private HighScores highScores;
   
+=======
+  MinesweeperGame gameInfo = new MinesweeperGame();
+>>>>>>> 0a298acb4bcf4f59b3cf401a4ddb943d28ea9d6f
  
   public MineSweeperDisplay(){
    super();
