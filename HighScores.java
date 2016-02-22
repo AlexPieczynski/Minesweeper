@@ -145,6 +145,17 @@ public class HighScores
   }
   
   
+  //deletes any high scores currently in the object
+  //makes the high scores file empty
+  public void resetHighScores()
+  {
+    names = null;
+    times = null;
+    nScores = 0;
+    saveToFile();
+  }
+  
+  
   //simple main to test functionality
   public static void main(String[] args)
   {
@@ -161,5 +172,6 @@ public class HighScores
 
     highScores.printScores();
     highScores.saveToFile();
+    highScores.resetHighScores();
   }
 }
