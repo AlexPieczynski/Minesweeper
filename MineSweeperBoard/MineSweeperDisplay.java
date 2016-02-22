@@ -9,16 +9,30 @@ import javax.imageio.ImageIO;
 
 public class MineSweeperDisplay extends JPanel{
   
-  JLabel mineCounter = new JLabel("##");
-  JLabel timer = new JLabel("xx:xx");
+  JLabel mineCounter = new JLabel("##"); //Dummy labels to hold later functionality. 
+  JLabel timeLabel = new JLabel("xx:xx");
   JLabel smiley = new JLabel("img");
   GridBagLayout gBag = new GridBagLayout();
   GridBagConstraints c = new GridBagConstraints();
+  
+  //---------Timer and Counter Variables-----------------
+  private int nMines; //used to display num of mines left on the board. decrements when a mine is marked.
+  private Timer clock; //counts time elapsed since first left-click on Grid
+  private int secs; //same as above
+  private HighScores highScores;
+  
  
   public MineSweeperDisplay(){
    super();
    this.setLayout(gBag);
    c.insets = new Insets(0,20,20,0);
+   
+   nMines = 10;
+   secs = 0;
+   highScores = new HighScores();
+   TimeHandler t = new TimeHandler(); 
+   clock = new Timer(1000, t);
+   clock.start();
    
    c.anchor = GridBagConstraints.LAST_LINE_START;
    this.add(mineCounter,c);
@@ -27,7 +41,7 @@ public class MineSweeperDisplay extends JPanel{
    this.add(smiley,c);
    
    c.anchor = GridBagConstraints.LAST_LINE_END;
-   this.add(timer,c);
+   this.add(timeLabel,c);
    
   }
   
@@ -36,10 +50,16 @@ public class MineSweeperDisplay extends JPanel{
     
   }
   
-  private void updateTimer(){
-  }
   
   private void updateSmiley(){
+  }
+  
+   private class TimeHandler implements ActionListener{ //Timehandler event listener
+    public void actionPerformed( ActionEvent event ){
+     secs++;
+     timeLabel.setText("" + secs);
+     
+    }
   }
   
 }
