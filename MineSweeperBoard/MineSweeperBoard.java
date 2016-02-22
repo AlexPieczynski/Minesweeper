@@ -56,6 +56,7 @@ public class MineSweeperBoard extends JPanel{
     if(source.state == buttonState.NORMAL){
      source.setIcon(new ImageIcon("button_pressed.gif"));
      source.state = buttonState.PRESSED;
+     
     }
     else if (source.state == buttonState.PRESSED){
       source.setIcon(new ImageIcon("button_normal.gif"));
@@ -63,7 +64,7 @@ public class MineSweeperBoard extends JPanel{
     }
     
     //*******TEST CODE****Remove later
-    //source.setText(""+source.x+","+source.y);
+    //source.setText(""+source.hasBomb);
     
    }
   }
@@ -115,6 +116,19 @@ public class MineSweeperBoard extends JPanel{
          boardSquares[j][i] = b;
        }
      }
+     
+     //randomly place ten bombs on board
+     int i=0;
+     while (i < 10){
+       int iRand = (int)(Math.random() * (boardSquares.length));
+       int jRand = (int)(Math.random() * (boardSquares[iRand].length));
+       
+       if (boardSquares[iRand][jRand].hasBomb == false){
+         boardSquares[iRand][jRand].hasBomb = true;
+         i++;
+       }
+     }
+     
      //Fill in the board with the newly created gray squares.   
      for (int ii = 0; ii < 10; ii++) {
        for (int jj = 0; jj < 10; jj++) {

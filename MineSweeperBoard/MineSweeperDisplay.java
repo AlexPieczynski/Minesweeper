@@ -14,6 +14,7 @@ public class MineSweeperDisplay extends JPanel{
   JLabel smiley = new JLabel("img");
   GridBagLayout gBag = new GridBagLayout();
   GridBagConstraints c = new GridBagConstraints();
+  MinesweeperGame gameInfo = new MinesweeperGame();
  
   public MineSweeperDisplay(){
    super();
