@@ -90,7 +90,6 @@ public class MineSweeperBoard extends JPanel{
     MineSweeperButton(ImageIcon icon, int i, int j){
       super(icon);
       x = i; y = j; //Index variables
-      state = buttonState.NORMAL;
     }
   }
   
@@ -132,6 +131,8 @@ public class MineSweeperBoard extends JPanel{
         MineSweeperButton b = new MineSweeperButton(icon, i, j);
         b.setMargin(buttonMargin);
         b.setIcon(icon);
+        b.hasBomb = false;
+        b.state = buttonState.NORMAL;
         b.addMouseListener(new RightClickListener());
         b.addActionListener(new ButtonListener());
         boardSquares[j][i] = b;
@@ -182,8 +183,17 @@ public class MineSweeperBoard extends JPanel{
     return boardSquares;
   }
   
-  public void startNewGame(){ //TODO start a new game
-     
+  public void startNewGame(){//Code to reset initial conditions
+    msDisplay.secs = 0;
+    msDisplay.timeLabel.setText("\tTime: " + msDisplay.secs);
+    msg.resetGame();
+    resetBoard();
+    msDisplay.mineCounter.setText("Mines: "+ msg.getnMines());
+    gameOver = false;
+  }
+  
+  public void resetBoard(){
+    
   }
   
   public class MineSweeperDisplay extends JPanel{
@@ -217,18 +227,18 @@ public class MineSweeperBoard extends JPanel{
    this.add(mineCounter,c);
    
    c.anchor = GridBagConstraints.PAGE_END;
-   smileyButton.addActionListener(new ButtonListener());
+   smileyButton.addActionListener(new SmileyListener());
    this.add(smileyButton,c);
    
    c.anchor = GridBagConstraints.LAST_LINE_END;
    this.add(timeLabel,c);
   }
   
-  public class ButtonListener implements ActionListener{
+  public class SmileyListener implements ActionListener{ //Reset the game when smiley button is pressed.
   
     public void actionPerformed(ActionEvent event){
-      resetGame = true;
       gameOver = true;
+      startNewGame();
     }
   }
   
@@ -264,4 +274,6 @@ public class MineSweeperBoard extends JPanel{
     };
     SwingUtilities.invokeLater(r); 
   }//End of main method.
+  
+  
 }

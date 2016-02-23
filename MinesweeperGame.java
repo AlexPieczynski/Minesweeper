@@ -27,6 +27,10 @@ public class MinesweeperGame
     return nMines;
   }
   
+  public void resetGame(){
+    nMines = 10;
+  }
+  
   public void handleBomb(MineSweeperBoard.MineSweeperButton[][] grid){
     
     //set all buttons to pressed
