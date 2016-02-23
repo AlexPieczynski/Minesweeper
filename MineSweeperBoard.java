@@ -9,14 +9,17 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
 
+
 public class MineSweeperBoard extends JPanel{
   
   private MineSweeperButton[][] boardSquares = new MineSweeperButton [10][10];
   private JPanel mineSweeperGrid;
   private MineSweeperMenu optionsMenu;
   private MinesweeperGame msg;
-  
-  //Image array variables to hold the various images for the board 
+  private MineSweeperDisplay msDisplay;
+  public boolean gameOverB = false; //Variable to tell the MSB program when the game has ended. 
+
+//Image array variables to hold the various images for the board 
   private ImageIcon[] gridNumberIcons = new ImageIcon[8]; //16x16 gifs
   private ImageIcon[] bombIcons= new ImageIcon[3]; //16x16 gifs
   private ImageIcon[] flagIcons = new ImageIcon[2]; //16x16 gifs
@@ -29,21 +32,23 @@ public class MineSweeperBoard extends JPanel{
   public enum buttonState {NORMAL, PRESSED, FLAGGED, Q_MARKED}
   
   
-  public MineSweeperBoard(){
+  public MineSweeperBoard(){  //Constructo for MineSweeperBoard
     super(new BorderLayout(3, 3));
     optionsMenu = new MineSweeperMenu();
     msg = new MinesweeperGame();
     initializeBoard();
-    
+    msDisplay = new MineSweeperDisplay();   
   }
   
-  public class ButtonListener implements ActionListener{  
+  public class ButtonListener implements ActionListener{ //Listener for each button on the grid.  
    public void actionPerformed(ActionEvent event) {
    // Find out which button was clicked
     MineSweeperButton source = (MineSweeperButton)event.getSource();
     if(source.state == buttonState.NORMAL){
-      if(source.hasBomb){ //If mine was clicked AND has bomb.
+      if(source.hasBomb){ //If mine was clicked AND has bomb, the game is over.
         source.setIcon(new ImageIcon("button_bomb_x.gif"));
+        gameOverB = true;
+        msDisplay.gameOverD = true;
         //gameLost();
       }
       else
@@ -52,14 +57,6 @@ public class MineSweeperBoard extends JPanel{
         source.state = buttonState.PRESSED;
       }
     }
-    /*if (source.hasBomb){
-      msg.handleBomb(boardSquares); //set all button to pushed
-      
-    }*/
-    
-    //*******TEST CODE****Remove later
-    //source.setText(""+source.hasBomb);
-    
    }
   }
   
@@ -69,12 +66,18 @@ public class MineSweeperBoard extends JPanel{
         MineSweeperButton source = (MineSweeperButton)e.getSource();
         
         if(source.state == buttonState.NORMAL){//If right click on a normal tile:
-         source.setIcon(new ImageIcon("button_flag.gif"));
-         source.state = buttonState.FLAGGED;
+          if(msg.getnMines() > 0){//To avoid getting negative values in the counter.
+            source.setIcon(new ImageIcon("button_flag.gif"));
+            source.state = buttonState.FLAGGED;
+            msg.decrementMines(); //decrease mine counter
+            msDisplay.mineCounter.setText("Mines: "+ msg.getnMines());
+          }
         }
-        else if(source.state==buttonState.FLAGGED){
+        else if(source.state==buttonState.FLAGGED){ //If right click on a button that already has a flag.
           source.setIcon(new ImageIcon("button_question.gif"));
           source.state = buttonState.Q_MARKED;
+          msg.incrementMines(); //increase mine counter
+          msDisplay.mineCounter.setText("Mines: "+ msg.getnMines());
         }
         else if(source.state==buttonState.Q_MARKED){
           source.setIcon(new ImageIcon("button_normal.gif"));
@@ -100,83 +103,77 @@ public class MineSweeperBoard extends JPanel{
   public void initializeBoard(){
     
     this.setBorder(new EmptyBorder(5,5,5,5));
+    mineSweeperGrid = new JPanel(new GridLayout(0,10)){
+      @Override //Overriding the getPreferredSize method
+      public final Dimension getPreferredSize() {
+        Dimension d = super.getPreferredSize();
+        Dimension prefSize = null;
+        Component c = getParent();
+        if (c == null) {
+          prefSize = new Dimension((int)d.getWidth(),(int)d.getHeight());
+        }
+        else if (c!=null && c.getWidth()>d.getWidth() && c.getHeight()>d.getHeight()) {
+          prefSize = c.getSize();
+        }
+        else {
+          prefSize = d;
+        }
+        int w = (int) prefSize.getWidth();
+        int h = (int) prefSize.getHeight();
+        int s = (w>h ? h : w); //Get the smalller of the two sizes
+        return new Dimension(s,s);//
+      } //End of getPreferredSize() --> The new Dimension will be given to GridBagLayout object.
+    };
     
+    mineSweeperGrid.setBorder(new EmptyBorder(10,10,10,10));
     
-     
-     mineSweeperGrid = new JPanel(new GridLayout(0,10)){ 
-       @Override //Overriding the getPreferredSize method
-        public final Dimension getPreferredSize() {
-         Dimension d = super.getPreferredSize();
-         Dimension prefSize = null;
-         Component c = getParent();
-         if (c == null) {
-           prefSize = new Dimension((int)d.getWidth(),(int)d.getHeight());
-         } 
-         else if (c!=null && c.getWidth()>d.getWidth() && c.getHeight()>d.getHeight()) {
-           prefSize = c.getSize();
-         } 
-         else {
-           prefSize = d;
-         }
-         int w = (int) prefSize.getWidth();
-         int h = (int) prefSize.getHeight();
-         int s = (w>h ? h : w); //Get the smalller of the two sizes
-         return new Dimension(s,s);//
-       } //End of getPreferredSize() --> The new Dimension will be given to GridBagLayout object.
-     };
-  
-     mineSweeperGrid.setBorder(new EmptyBorder(10,10,10,10));
-     
-     this.add(mineSweeperGrid);     
-     
-     Insets buttonMargin = new Insets(0, 0, 0, 0); //Create buttons for the board.
-     ImageIcon icon = new ImageIcon("button_normal.gif");
-     
-     for (int i = 0; i < boardSquares.length; i++) {
-       for (int j = 0; j < boardSquares[i].length; j++) {
-       //Create 16x16 button with an image.
-         MineSweeperButton b = new MineSweeperButton(icon, i, j);
-         b.setMargin(buttonMargin);
-         b.setIcon(icon);
-         b.addMouseListener(new RightClickListener());
-         b.addActionListener(new ButtonListener());
-         boardSquares[j][i] = b;
+    this.add(mineSweeperGrid);
+    
+    Insets buttonMargin = new Insets(0, 0, 0, 0); //Create buttons for the board.
+    ImageIcon icon = new ImageIcon("button_normal.gif");
+    
+    for (int i = 0; i < boardSquares.length; i++) {
+      for (int j = 0; j < boardSquares[i].length; j++) {
+//Create 16x16 button with an image.
+        MineSweeperButton b = new MineSweeperButton(icon, i, j);
+        b.setMargin(buttonMargin);
+        b.setIcon(icon);
+        b.addMouseListener(new RightClickListener());
+        b.addActionListener(new ButtonListener());
+        boardSquares[j][i] = b;
+      }
+    }
+//randomly place ten bombs on board
+    int i=0;
+    while (i < 10){
+      int iRand = (int)(Math.random() * (boardSquares.length));
+      int jRand = (int)(Math.random() * (boardSquares[iRand].length));
+      if (boardSquares[iRand][jRand].hasBomb == false){   //ensure no duplicates
+        boardSquares[iRand][jRand].hasBomb = true;
+        i++;
        }
-     }
-     
-     //randomly place ten bombs on board
-     int i=0;
-     while (i < 10){
-       int iRand = (int)(Math.random() * (boardSquares.length));
-       int jRand = (int)(Math.random() * (boardSquares[iRand].length));
-       
-       if(boardSquares[iRand][jRand].hasBomb == false){
-         boardSquares[iRand][jRand].hasBomb = true;
-           i++;
-       }
-     }
-     
-     //Fill in the board with the newly created gray squares.   
-     for (int ii = 0; ii < 10; ii++) {
-       for (int jj = 0; jj < 10; jj++) {
-         mineSweeperGrid.add(boardSquares[jj][ii]);
-       }
-     }
-     
+    }
+
+//Fill in the board with the newly created gray squares.
+    for (int ii = 0; ii < 10; ii++) {
+      for (int jj = 0; jj < 10; jj++) {
+        mineSweeperGrid.add(boardSquares[jj][ii]);
+      }
+    }
   }//End of initializeBoard()
   
-  /******Class for the drop down menu for a minesweeper board.
-  *******/
+  /******Class for the drop down menu for a minesweeper board. ********/
+  
   private class MineSweeperMenu extends JToolBar{
     
   private MineSweeperMenu()
   {
+   
     super();
     this.setFloatable(false);
     
     this.add(new JButton("Game")); 
     this.add(new JButton("Help"));
-    
   }
   
 }
@@ -194,4 +191,27 @@ public class MineSweeperBoard extends JPanel{
   public void startNewGame(){ //TODO start a new game
      
   }
+  
+  public static void main (String[] args)
+  {
+     Runnable r = new Runnable(){
+     @Override
+     public void run() { 
+      MineSweeperBoard msBoard = new MineSweeperBoard();
+      
+      JFrame f = new JFrame("Minesweeper");
+      
+      f.add(msBoard.getOptionsMenu(), BorderLayout.PAGE_START); //Add the dropdown menu.
+      f.add(msBoard.msDisplay,BorderLayout.PAGE_END); //Add the display panel;
+      f.add(msBoard, BorderLayout.CENTER); //Add the game board.
+      
+      f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+      f.setLocationByPlatform(true);
+      f.pack();
+      f.setMinimumSize(f.getSize());
+      f.setVisible(true);
+     }
+    };
+    SwingUtilities.invokeLater(r); 
+  }//End of main method.
 }

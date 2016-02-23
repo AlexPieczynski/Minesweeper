@@ -1,5 +1,5 @@
-//This class holds information about the current minesweeper game.
-//Also holds the game logic.
+//This class holds information about the current minesweeper game\
+//also hold the game logic
 
 import java.awt.*;
 import java.awt.event.*;
@@ -15,7 +15,18 @@ public class MinesweeperGame
     nMines = 10;
     highScores = new HighScores();
   }
-  /*
+  
+  
+  public void incrementMines(){
+    nMines++;
+  }
+  public void decrementMines(){
+    nMines--;
+  }
+  public int getnMines(){
+    return nMines;
+  }
+  
   public void handleBomb(MineSweeperBoard.MineSweeperButton[][] grid){
     
     //set all buttons to pressed
@@ -24,31 +35,6 @@ public class MinesweeperGame
         grid[i][j].state = MineSweeperBoard.buttonState.PRESSED;
       }
     }
-  }
-  */
-    public static void main (String[] args)
-  {
-     Runnable r = new Runnable(){
-     @Override
-     public void run() { 
-      MinesweeperGame game = new MinesweeperGame(); 
-      MineSweeperBoard msBoard = new MineSweeperBoard();
-      MineSweeperDisplay msDisplay = new MineSweeperDisplay();
-      
-      JFrame f = new JFrame("Minesweeper");
-      
-      f.add(msBoard.getOptionsMenu(), BorderLayout.PAGE_START); //Add the dropdown menu.
-      f.add(msDisplay,BorderLayout.PAGE_END); //Add the display panel;
-      f.add(msBoard, BorderLayout.CENTER); //Add the game board.
-      
-      f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-      f.setLocationByPlatform(true);
-      f.pack();
-      f.setMinimumSize(f.getSize());
-      f.setVisible(true);
-     }
-    };
-    SwingUtilities.invokeLater(r); 
-  }//End of main method.
+  }  
   
 }
