@@ -8,8 +8,6 @@ import javax.swing.border.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
-
-
 public class MineSweeperBoard extends JPanel{
   
   private MineSweeperButton[][] boardSquares = new MineSweeperButton [10][10];
@@ -17,7 +15,9 @@ public class MineSweeperBoard extends JPanel{
   private MineSweeperMenu optionsMenu;
   private MinesweeperGame msg;
   private MineSweeperDisplay msDisplay;
-  public boolean gameOverB = false; //Variable to tell the MSB program when the game has ended. 
+  
+  public boolean gameOver = false; //Variable to tell the program when the game has ended.
+  public boolean resetGame = false;
 
 //Image array variables to hold the various images for the board 
   private ImageIcon[] gridNumberIcons = new ImageIcon[8]; //16x16 gifs
@@ -25,12 +25,7 @@ public class MineSweeperBoard extends JPanel{
   private ImageIcon[] flagIcons = new ImageIcon[2]; //16x16 gifs
   private ImageIcon buttonIcons [] = new ImageIcon[2]; //16x16 gifs
   
-  private ImageIcon[] countDownIcons = new ImageIcon[10]; //13x23 gifs
-  
-  private ImageIcon[] smileyIcons = new ImageIcon[5]; //26x26 gifs
-  
   public enum buttonState {NORMAL, PRESSED, FLAGGED, Q_MARKED}
-  
   
   public MineSweeperBoard(){  //Constructo for MineSweeperBoard
     super(new BorderLayout(3, 3));
@@ -47,8 +42,7 @@ public class MineSweeperBoard extends JPanel{
     if(source.state == buttonState.NORMAL){
       if(source.hasBomb){ //If mine was clicked AND has bomb, the game is over.
         source.setIcon(new ImageIcon("button_bomb_x.gif"));
-        gameOverB = true;
-        msDisplay.gameOverD = true;
+        gameOver = true;
         //gameLost();
       }
       else
@@ -191,6 +185,62 @@ public class MineSweeperBoard extends JPanel{
   public void startNewGame(){ //TODO start a new game
      
   }
+  
+  public class MineSweeperDisplay extends JPanel{
+  
+  JLabel mineCounter = new JLabel("Mines: 10"); //Dummy labels to hold later functionality. 
+  JLabel timeLabel = new JLabel("\tTime: 0");
+  JButton smileyButton = new JButton(new ImageIcon("smile_button.gif"));
+  
+  GridBagLayout gBag = new GridBagLayout();
+  GridBagConstraints c = new GridBagConstraints();
+  
+  //---------Timer and Counter Variables-----------------
+  private int nMines; //used to display num of mines left on the board. decrements when a mine is marked.
+  private Timer clock; //counts time elapsed since first left-click on Grid
+  private int secs; //same as above
+  private HighScores highScores;
+   
+  public MineSweeperDisplay(){
+   super();
+   this.setLayout(gBag);
+   c.insets = new Insets(0,10,10,0);
+   
+   nMines = 10;
+   secs = 0;
+   highScores = new HighScores();
+   TimeHandler t = new TimeHandler(); 
+   clock = new Timer(1000, t);
+   clock.start();
+   
+   c.anchor = GridBagConstraints.LAST_LINE_START;
+   this.add(mineCounter,c);
+   
+   c.anchor = GridBagConstraints.PAGE_END;
+   smileyButton.addActionListener(new ButtonListener());
+   this.add(smileyButton,c);
+   
+   c.anchor = GridBagConstraints.LAST_LINE_END;
+   this.add(timeLabel,c);
+  }
+  
+  public class ButtonListener implements ActionListener{
+  
+    public void actionPerformed(ActionEvent event){
+      resetGame = true;
+      gameOver = true;
+    }
+  }
+  
+   private class TimeHandler implements ActionListener{ //Timehandler event listener
+    public void actionPerformed( ActionEvent event ){
+      if(!gameOver){//Stop updating the counter once the game is over.
+        secs++;}
+        timeLabel.setText("\tTime: " + secs);
+    }
+   }
+  
+}
   
   public static void main (String[] args)
   {
