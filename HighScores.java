@@ -1,4 +1,6 @@
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 import java.io.*;
 import java.util.Scanner;
@@ -153,6 +155,56 @@ public class HighScores
     times = null;
     nScores = 0;
     saveToFile();
+  }  
+  
+  /*****************GUI STUFF******************/
+  
+  //spawns a gui window
+  private void showScoreWindow()
+  {
+    HighGUI window = new HighGUI();
+  }
+  
+  //GUI window containing a list of high scores
+  //also has a reset button which clears all highscores and closes the window
+  private class HighGUI extends JFrame{
+    JButton resetButton;
+    
+    public HighGUI() {     
+      super("Top Ten Scores");
+      setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+      getContentPane().setLayout(new GridLayout(13,0));
+      
+      getContentPane().add( new JLabel("********TOP TEN PLAYERS******"));
+      getContentPane().add( new JLabel("NAME : TIME"));
+      
+      //add player's high scores
+      for (int i=0; i < nScores; i++)
+      {
+        JLabel scores = new JLabel ("High Score");
+        getContentPane().add (scores);
+        scores.setText (names[i] + " : " + times[i]);
+      }
+      
+      //add reset button
+      ButtonHandler bh = new ButtonHandler();
+      resetButton = new JButton("Reset");
+      resetButton.addActionListener ( bh );
+      getContentPane().add (resetButton);
+      
+      setSize( 215, 300 );
+      setVisible(true);
+    }
+    
+    //handle reset button push by calling reset function
+    private class ButtonHandler implements ActionListener {
+      public void actionPerformed( ActionEvent event )
+      {
+         JOptionPane.showMessageDialog( null, "You have reset the high scores");         
+         resetHighScores();
+         dispose();
+      }
+    }
   }
   
   
@@ -166,12 +218,13 @@ public class HighScores
     {
       if (highScores.isHighScore(i)){
         //System.out.println("new high score: "+i);
-        highScores.addHighScore(i);
+        //highScores.addHighScore(i);
       }
     }
 
     highScores.printScores();
+    highScores.showScoreWindow();
     highScores.saveToFile();
-    highScores.resetHighScores();
+    //highScores.resetHighScores();
   }
 }
