@@ -48,7 +48,7 @@ public class MineSweeperBoard extends JPanel{
      source.state = buttonState.PRESSED;          
     }
     if (source.hasBomb){
-      msg.handleBomb(); //set all button to pushed
+      msg.handleBomb(boardSquares); //set all button to pushed
       
     }
     
@@ -56,6 +56,27 @@ public class MineSweeperBoard extends JPanel{
     //source.setText(""+source.hasBomb);
     
    }
+  }
+  
+    private class RightClickListener extends MouseAdapter {
+    public void mouseClicked (MouseEvent e){
+      if (SwingUtilities.isRightMouseButton(e)){
+        MineSweeperButton source = (MineSweeperButton)e.getSource();
+        
+        if(source.state == buttonState.NORMAL){//If right click on a normal tile:
+         source.setIcon(new ImageIcon("button_flag.gif"));
+         source.state = buttonState.FLAGGED;
+        }
+        else if(source.state==buttonState.FLAGGED){
+          source.setIcon(new ImageIcon("button_question.gif"));
+          source.state = buttonState.Q_MARKED;
+        }
+        else if(source.state==buttonState.Q_MARKED){
+          source.setIcon(new ImageIcon("button_normal.gif"));
+          source.state = buttonState.NORMAL;
+        }
+      }
+    }
   }
   
   public class MineSweeperButton extends JButton{ //Nested class for button on the MineSweeperBoard.
@@ -101,9 +122,7 @@ public class MineSweeperBoard extends JPanel{
   
      mineSweeperGrid.setBorder(new EmptyBorder(10,10,10,10));
      
-     this.add(mineSweeperGrid);
-
-     
+     this.add(mineSweeperGrid);     
      
      Insets buttonMargin = new Insets(0, 0, 0, 0); //Create buttons for the board.
      ImageIcon icon = new ImageIcon("button_normal.gif");
@@ -114,6 +133,7 @@ public class MineSweeperBoard extends JPanel{
          MineSweeperButton b = new MineSweeperButton(icon, i, j);
          b.setMargin(buttonMargin);
          b.setIcon(icon);
+         b.addMouseListener(new RightClickListener());
          b.addActionListener(new ButtonListener());
          boardSquares[j][i] = b;
        }
@@ -125,10 +145,8 @@ public class MineSweeperBoard extends JPanel{
        int iRand = (int)(Math.random() * (boardSquares.length));
        int jRand = (int)(Math.random() * (boardSquares[iRand].length));
        
-       if (boardSquares[iRand][jRand].hasBomb == false){
          boardSquares[iRand][jRand].hasBomb = true;
          i++;
-       }
      }
      
      //Fill in the board with the newly created gray squares.   

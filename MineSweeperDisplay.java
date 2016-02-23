@@ -45,7 +45,6 @@ public class MineSweeperDisplay extends JPanel{
    
    c.anchor = GridBagConstraints.LAST_LINE_END;
    this.add(timeLabel,c);
-   
   }
   
   
