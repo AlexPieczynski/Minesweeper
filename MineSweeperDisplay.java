@@ -9,9 +9,11 @@ import javax.imageio.ImageIO;
 
 public class MineSweeperDisplay extends JPanel{
   
-  JLabel mineCounter = new JLabel("##"); //Dummy labels to hold later functionality. 
+  JLabel mineCounter = new JLabel(" ## "); //Dummy labels to hold later functionality. 
   JLabel timeLabel = new JLabel("0");
-  JLabel smiley = new JLabel("img");
+  
+  JButton smileyButton = new JButton(new ImageIcon("smile_button.gif"));
+  
   GridBagLayout gBag = new GridBagLayout();
   GridBagConstraints c = new GridBagConstraints();
   
@@ -28,7 +30,7 @@ public class MineSweeperDisplay extends JPanel{
   public MineSweeperDisplay(){
    super();
    this.setLayout(gBag);
-   c.insets = new Insets(0,20,20,0);
+   c.insets = new Insets(0,10,10,0);
    
    nMines = 10;
    secs = 0;
@@ -41,7 +43,9 @@ public class MineSweeperDisplay extends JPanel{
    this.add(mineCounter,c);
    
    c.anchor = GridBagConstraints.PAGE_END;
-   this.add(smiley,c);
+   smileyButton.setSize(16,16);
+   smileyButton.addActionListener(new ButtonListener());
+   this.add(smileyButton,c);
    
    c.anchor = GridBagConstraints.LAST_LINE_END;
    this.add(timeLabel,c);
@@ -56,10 +60,17 @@ public class MineSweeperDisplay extends JPanel{
   private void updateSmiley(){
   }
   
+  public class ButtonListener implements ActionListener{
+  
+    public void actionPerformed(ActionEvent event){
+      smileyButton.setIcon(new ImageIcon("smile_button_pressed.gif"));
+    }
+  }
+  
    private class TimeHandler implements ActionListener{ //Timehandler event listener
     public void actionPerformed( ActionEvent event ){
      secs++;
-     timeLabel.setText("" + secs);     
+     timeLabel.setText(" " + secs);     
     }
   }
   

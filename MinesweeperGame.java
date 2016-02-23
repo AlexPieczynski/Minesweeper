@@ -1,5 +1,5 @@
-//This class holds information about the current minesweeper game\
-//also hold the game logic
+//This class holds information about the current minesweeper game.
+//Also holds the game logic.
 
 import java.awt.*;
 import java.awt.event.*;
@@ -15,17 +15,17 @@ public class MinesweeperGame
     nMines = 10;
     highScores = new HighScores();
   }
-  
+  /*
   public void handleBomb(MineSweeperBoard.MineSweeperButton[][] grid){
     
     //set all buttons to pressed
-    for (int i=0; i < grid.length; i++){
-      for (int j=0; j < grid[j].length; j++){
+    for (int i=0; i < 10; i++){
+      for (int j=0; j < 10; j++){
         grid[i][j].state = MineSweeperBoard.buttonState.PRESSED;
       }
     }
   }
-  
+  */
     public static void main (String[] args)
   {
      Runnable r = new Runnable(){

@@ -9,14 +9,12 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
 
-
 public class MineSweeperBoard extends JPanel{
   
   private MineSweeperButton[][] boardSquares = new MineSweeperButton [10][10];
   private JPanel mineSweeperGrid;
   private MineSweeperMenu optionsMenu;
   private MinesweeperGame msg;
-  //private JPanel mineSweeperGUI= new JPanel(new BorderLayout(3, 3));
   
   //Image array variables to hold the various images for the board 
   private ImageIcon[] gridNumberIcons = new ImageIcon[8]; //16x16 gifs
@@ -44,13 +42,20 @@ public class MineSweeperBoard extends JPanel{
    // Find out which button was clicked
     MineSweeperButton source = (MineSweeperButton)event.getSource();
     if(source.state == buttonState.NORMAL){
-     source.setIcon(new ImageIcon("button_pressed.gif"));
-     source.state = buttonState.PRESSED;          
+      if(source.hasBomb){ //If mine was clicked AND has bomb.
+        source.setIcon(new ImageIcon("button_bomb_x.gif"));
+        //gameLost();
+      }
+      else
+      {//If mine was clicked and DOES NOT have a bomb.
+        source.setIcon(new ImageIcon("button_pressed.gif"));
+        source.state = buttonState.PRESSED;
+      }
     }
-    if (source.hasBomb){
+    /*if (source.hasBomb){
       msg.handleBomb(boardSquares); //set all button to pushed
       
-    }
+    }*/
     
     //*******TEST CODE****Remove later
     //source.setText(""+source.hasBomb);
@@ -145,8 +150,10 @@ public class MineSweeperBoard extends JPanel{
        int iRand = (int)(Math.random() * (boardSquares.length));
        int jRand = (int)(Math.random() * (boardSquares[iRand].length));
        
+       if(boardSquares[iRand][jRand].hasBomb == false){
          boardSquares[iRand][jRand].hasBomb = true;
-         i++;
+           i++;
+       }
      }
      
      //Fill in the board with the newly created gray squares.   
@@ -164,12 +171,12 @@ public class MineSweeperBoard extends JPanel{
     
   private MineSweeperMenu()
   {
-   
     super();
     this.setFloatable(false);
     
     this.add(new JButton("Game")); 
     this.add(new JButton("Help"));
+    
   }
   
 }
