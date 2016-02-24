@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
+import java.util.ArrayList;
 
 public class MineSweeperBoard extends JPanel{
   
@@ -15,9 +16,10 @@ public class MineSweeperBoard extends JPanel{
   private MineSweeperMenu optionsMenu;
   private MinesweeperGame msg;
   private MineSweeperDisplay msDisplay;
+  //private DisabledGlassPane glass = new DisabledGlassPane();
   
+  public int buttonsCleared = 0; 
   public boolean gameOver = false; //Variable to tell the program when the game has ended.
-  public boolean resetGame = false;
 
 //Image array variables to hold the various images for the board 
   private ImageIcon[] gridNumberIcons = new ImageIcon[8]; //16x16 gifs
@@ -29,10 +31,22 @@ public class MineSweeperBoard extends JPanel{
   
   public MineSweeperBoard(){  //Constructo for MineSweeperBoard
     super(new BorderLayout(3, 3));
-    optionsMenu = new MineSweeperMenu();
     msg = new MinesweeperGame();
     initializeBoard();
-    msDisplay = new MineSweeperDisplay();   
+    msDisplay = new MineSweeperDisplay();
+    optionsMenu = new MineSweeperMenu(msg.getHighScores(), this);
+    
+    String string = new String("button_");
+    String number;
+    int temp;
+    
+    for(int i = 0; i < 8; i++){ //Create an array of number gifs.
+      temp = i + 1;
+      number = new String(string +temp);
+      number = new String(number+ ".gif");
+      
+      gridNumberIcons[i]=new ImageIcon(number);
+    }
   }
   
   public class ButtonListener implements ActionListener{ //Listener for each button on the grid.  
@@ -40,21 +54,19 @@ public class MineSweeperBoard extends JPanel{
    // Find out which button was clicked
     MineSweeperButton source = (MineSweeperButton)event.getSource();
     if(source.state == buttonState.NORMAL){
-      if(source.hasBomb){ //If mine was clicked AND has bomb, the game is over.
+      if(source.hasBomb){            //If mine was clicked AND has bomb, the game is over.
         source.setIcon(new ImageIcon("button_bomb_x.gif"));
-        gameOver = true;
-        //gameLost();
+        gameLost(source.x, source.y);//Initiate the sequence for losing a game.
       }
       else
       {//If mine was clicked and DOES NOT have a bomb.
-        source.setIcon(new ImageIcon("button_pressed.gif"));
-        source.state = buttonState.PRESSED;
+        clearSurrounding(source); //Inspect and clear any surroundiing buttons
       }
     }
    }
   }
   
-    private class RightClickListener extends MouseAdapter {
+  private class RightClickListener extends MouseAdapter {
     public void mouseClicked (MouseEvent e){
       if (SwingUtilities.isRightMouseButton(e)){
         MineSweeperButton source = (MineSweeperButton)e.getSource();
@@ -135,7 +147,7 @@ public class MineSweeperBoard extends JPanel{
         b.state = buttonState.NORMAL;
         b.addMouseListener(new RightClickListener());
         b.addActionListener(new ButtonListener());
-        boardSquares[j][i] = b;
+        boardSquares[i][j] = b;
       }
     }
 //randomly place ten bombs on board
@@ -157,24 +169,6 @@ public class MineSweeperBoard extends JPanel{
     }
   }//End of initializeBoard()
   
-  /******Class for the drop down menu for a minesweeper board. ********/
-  
-  private class MineSweeperMenu extends JToolBar{
-    
-  private MineSweeperMenu()
-  {
-   
-    super();
-    this.setFloatable(false);
-    
-    this.add(new JButton("Game")); 
-    this.add(new JButton("Help"));
-  }
-  
-}
- /****** End of MineSweeperMenu class.
- *******/
-  
   public MineSweeperMenu getOptionsMenu(){
     return optionsMenu;
   }
@@ -190,11 +184,152 @@ public class MineSweeperBoard extends JPanel{
     resetBoard();
     msDisplay.mineCounter.setText("Mines: "+ msg.getnMines());
     gameOver = false;
+    buttonsCleared = 0;
+    msDisplay.smileyButton.setIcon(new ImageIcon("smile_button.gif"));
   }
   
-  public void resetBoard(){
-    
+  public void resetBoard(){ //A helper method to reset the entire game board.
+    MineSweeperButton[][] tempButtons = getGrid();
+    //Reset every button to normal.
+    for(int i = 0; i < 10; i++){
+      for(int j = 0; j < 10; j++){
+        tempButtons[i][j].state = buttonState.NORMAL;
+        tempButtons[i][j].hasBomb = false;
+        tempButtons[i][j].setIcon(new ImageIcon("button_normal.gif")); 
+      }
+    }//randomly place ten bombs on board
+    int i=0;
+    while (i < 10){
+      int iRand = (int)(Math.random() * (boardSquares.length));
+      int jRand = (int)(Math.random() * (boardSquares[iRand].length));
+      if (boardSquares[iRand][jRand].hasBomb == false){   //ensure no duplicates
+        boardSquares[iRand][jRand].hasBomb = true;
+        i++;
+      }
+    } 
   }
+  
+  public void gameLost(int x, int y){ //A method to perform the steps if a mine is clicked. 
+    gameOver = true; //show every bomb and stop the clock
+    MineSweeperButton[][] tempButtons = getGrid();
+    for(int i = 0; i < 10; i++){
+      for(int j = 0; j < 10; j++){
+        if(!(i == x && j == y) && tempButtons[i][j].hasBomb)
+          tempButtons[i][j].setIcon(new ImageIcon("button_bomb_pressed.gif")); 
+      }
+    }
+     msDisplay.smileyButton.setIcon(new ImageIcon("head_dead.gif"));                                      
+  }
+  
+   public void gameWon(int x, int y){
+    gameOver = true; //show every bomb and stop the clock
+    MineSweeperButton[][] tempButtons = getGrid();
+    for(int i = 0; i < 10; i++){
+      for(int j = 0; j < 10; j++){
+        if(i != x & j != y && tempButtons[i][j].hasBomb)
+          tempButtons[i][j].setIcon(new ImageIcon("button_bomb_pressed.gif"));
+      }
+    }
+    msDisplay.smileyButton.setIcon(new ImageIcon("head_glasses.gif"));
+    if (msg.getHighScores().isHighScore(msDisplay.secs)){
+       msg.getHighScores().addHighScore(msDisplay.secs);
+       msg.getHighScores().saveToFile();
+     }
+  }
+  
+  //A function to clear a normal button without a bomb. 
+  public void clearButton(MineSweeperButton b){ 
+    b.state = buttonState.PRESSED; //Marked button as pressed.
+    buttonsCleared++;
+    
+    if(buttonsCleared == 90){
+      if (!gameOver){
+        gameWon(b.x, b.y);
+        return;
+      }
+    }
+    
+    int row = b.x;
+    int col = b.y;
+    
+    int numMines = getMineCount(b); //Gett the number of mines in adjacent squares. 
+    if(numMines > 0)
+      b.setIcon(gridNumberIcons[numMines-1]);  //Display number of surrounding mines as gif image.
+    else
+      b.setIcon(new ImageIcon("button_pressed.gif"));
+  }
+  
+  private int getMineCount(MineSweeperButton b){ //Helper function to check neighbors for mines
+    int row = b.x;
+    int col = b.y;
+    int numMines = 0;
+    MineSweeperButton[][] neighbors = getGrid();
+    
+    
+     //Check the same row as the button.
+      if(col > 0)
+        if(neighbors[row][col-1].hasBomb)
+          numMines++;
+      if(col < 9)
+        if(neighbors[row][col+1].hasBomb)
+          numMines++;
+    
+    if(row > 0){ //Check 1 row below the button
+      if(neighbors[row-1][col].hasBomb)
+        numMines++;
+      if(col > 0)
+        if(neighbors[row-1][col-1].hasBomb)
+          numMines++;
+      if(col < 9) 
+        if(neighbors[row-1][col+1].hasBomb)
+        numMines++;
+    }
+    
+    if(row < 9){ //Check 1 row above the button
+      if(neighbors[row+1][col].hasBomb)
+        numMines++;
+      if(col > 0)
+        if(neighbors[row+1][col-1].hasBomb)
+          numMines++;
+      if(col < 9) 
+        if(neighbors[row+1][col+1].hasBomb)
+        numMines++;
+    }
+  
+    return numMines;
+  }
+
+  public void clearSurrounding(MineSweeperButton b){ //Helper function to clear the empty surrounding buttons.
+     
+    MineSweeperButton[][] neighbors = getGrid();
+    int row = b.x;
+    int col = b.y;
+    
+    if(b.state == buttonState.NORMAL && !(b.hasBomb)){
+      if(getMineCount(b) > 0){
+        clearButton(b); //Marked button as pressed.
+        return;
+      }
+      clearButton(b);
+    }
+    else
+      return;
+    
+    if(row < 9) //Check 1 row above the button
+      clearSurrounding(neighbors[row+1][col]);
+      
+    if(row > 0) //Check 1 row below the button
+      clearSurrounding(neighbors[row-1][col]);
+    
+    if(col < 9) //Check 1 col above the button
+      clearSurrounding(neighbors[row][col+1]);
+      
+    if(col > 0) //Check 1 col below the button
+      clearSurrounding(neighbors[row][col-1]);
+  }
+  
+ 
+      
   
   public class MineSweeperDisplay extends JPanel{
   
@@ -252,8 +387,7 @@ public class MineSweeperBoard extends JPanel{
   
 }
   
-  public static void main (String[] args)
-  {
+  public static void main(String[] args){
      Runnable r = new Runnable(){
      @Override
      public void run() { 

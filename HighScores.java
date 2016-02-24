@@ -94,7 +94,7 @@ public class HighScores
   public void addHighScore(int playerTime)
   {
     //prompt for user to input their name
-    String playerName = JOptionPane.showInputDialog("Please type in your name");
+    String playerName = JOptionPane.showInputDialog("YOU GOT A HIGH SCORE! Please type in your name");
     
     int newTimes[] = new int[10]; //will store updated scores array
     String newNames[] = new String[10]; //updated names array
@@ -106,8 +106,13 @@ public class HighScores
         System.arraycopy(names, 0, newNames, 0, i);
         newTimes[i] = playerTime;
         newNames[i] = playerName;
-        System.arraycopy(times, i+1, newTimes, i+1, nScores-i-1);
-        System.arraycopy(names, i+1, newNames, i+1, nScores-i-1);
+        if (i == 0){
+          System.arraycopy(times, i, newTimes, i+1, nScores-1);
+          System.arraycopy(names, i, newNames, i+1, nScores-1);
+          return;
+        }
+        System.arraycopy(times, i, newTimes, i+1, nScores-i);
+        System.arraycopy(names, i, newNames, i+1, nScores-i);
         if (nScores < 10)
           nScores++;
         times = newTimes;
@@ -125,7 +130,7 @@ public class HighScores
   
   //saves the contents of HighScores object to a file
   //must be called before the program is exited to save high scores
-  private void saveToFile()
+  public void saveToFile()
   {
     try{
       File file = new File("top-ten-scores.txt");
@@ -133,9 +138,12 @@ public class HighScores
       BufferedWriter bw = new BufferedWriter(fw);
       
       //write names and scores to file
+      System.out.println("nScores is" + nScores);
       for (int i=0; i < nScores; i++){
+        System.out.println("names["+i+"] is " + names[i]);
         bw.write(names[i]);
         bw.write(" ");
+        System.out.println("times["+i+"] is " + times[i]);
         bw.write(Integer.toString(times[i]));
         bw.newLine();
       }            
@@ -151,8 +159,8 @@ public class HighScores
   //makes the high scores file empty
   public void resetHighScores()
   {
-    names = null;
-    times = null;
+    names = new String[10];
+    times = new int[10];
     nScores = 0;
     saveToFile();
   }  
@@ -160,21 +168,21 @@ public class HighScores
   /*****************GUI STUFF******************/
   
   //spawns a gui window
-  private void showScoreWindow()
-  {
+  public void showScoreWindow(){
     HighGUI window = new HighGUI();
   }
   
   //GUI window containing a list of high scores
   //also has a reset button which clears all highscores and closes the window
   private class HighGUI extends JFrame{
-    JButton resetButton;
+    private JButton resetButton;
     
     public HighGUI() {     
       super("Top Ten Scores");
-      setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+      //setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
       getContentPane().setLayout(new GridLayout(13,0));
       
+      //headers
       getContentPane().add( new JLabel("********TOP TEN PLAYERS******"));
       getContentPane().add( new JLabel("NAME : TIME"));
       
@@ -198,14 +206,13 @@ public class HighScores
     
     //handle reset button push by calling reset function
     private class ButtonHandler implements ActionListener {
-      public void actionPerformed( ActionEvent event )
-      {
+      public void actionPerformed( ActionEvent event ){
          JOptionPane.showMessageDialog( null, "You have reset the high scores");         
          resetHighScores();
          dispose();
       }
     }
-  }
+  } //END OF HighGUI
   
   
   //simple main to test functionality
@@ -214,13 +221,20 @@ public class HighScores
     HighScores highScores = new HighScores(); //initialize object from file
     
     //attempt to add some high scores to the board
+    /*
     for (int i=0; i < 15; i++)
     {
       if (highScores.isHighScore(i)){
         //System.out.println("new high score: "+i);
-        //highScores.addHighScore(i);
+        highScores.addHighScore(i);
       }
-    }
+    }*/
+    if (highScores.isHighScore(10))
+      highScores.addHighScore(10);
+    if (highScores.isHighScore(9))
+      highScores.addHighScore(9);
+    if (highScores.isHighScore(11))
+      highScores.addHighScore(11);
 
     highScores.printScores();
     highScores.showScoreWindow();

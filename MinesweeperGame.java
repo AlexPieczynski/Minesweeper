@@ -27,6 +27,10 @@ public class MinesweeperGame
     return nMines;
   }
   
+  public HighScores getHighScores(){
+    return highScores;
+  }
+  
   public void resetGame(){
     nMines = 10;
   }
